@@ -1,16 +1,18 @@
 # Echo client program
 import socket
-for i in range(5):
-	print("Iteration %i" % (i))
+import multiprocessing
+import functools
+import threading
+
+def handle_client(tid):
 	HOST = 'localhost'    # The remote host
 	PORT = 8080              # The same port as used by the server
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((HOST, PORT))
-	s.send(b'Hello, world\n\r\n')
-	data = b''
-	with open("test.m4v", "wb") as f:
+	s.send(b'GET /\n\r\n')
+	with open("test%i.m4v" %(tid), "wb") as f:
 		while True:
-			data = s.recv(4096)
+			data = s.recv(8192)
 			# print("recv")
 			if not data:
 				break
@@ -18,6 +20,16 @@ for i in range(5):
 			f.write(data)
 
 
-	s.close()
 
+	s.close()
+def test_client():
+	print("Iteration")
+	tasks = []
+	for i in range(5):
+		p = threading.Thread(target=functools.partial(handle_client, i))
+		tasks.append(p)
+		p.start()
+
+	for t in tasks:
+		t.join()
 
