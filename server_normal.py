@@ -10,7 +10,7 @@ serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 serversocket.bind(('0.0.0.0', 8080))
 serversocket.listen(1)
 
-file_name = "film.m4v"
+file_name = "~/Desktop/film.m4v"
 try:
 	while True:
 		print("Serving a request")

@@ -1,6 +1,6 @@
 # Echo client program
 import socket
-for i in range(100):
+for i in range(5):
 	print("Iteration %i" % (i))
 	HOST = 'localhost'    # The remote host
 	PORT = 8080              # The same port as used by the server
