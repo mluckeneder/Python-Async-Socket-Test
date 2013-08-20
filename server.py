@@ -29,6 +29,12 @@ file_size = os.path.getsize(file_name)
 file_pointer = open(file_name, "rb")
 
 response += bytes("Content-Type: video/mp4\r\nContent-Length: %i\r\n\r\n" % (file_size), "ascii")
+
+def display_info(response_file):
+	os.system('clear')
+	for c, r in response_file.items():
+		print ("%s: %s" % (c.fileno, r) )
+
 try:
 	connections = {}
 	requests = {}
@@ -36,8 +42,9 @@ try:
 	response_file = {}
 	while True:
 		# print("Serving a request")
-
+		display_info()
 		events = epoll.poll(60)
+
 
 		for fileno, event in events:
 			if fileno == serversocket.fileno():
