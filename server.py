@@ -3,6 +3,13 @@
 import socket
 import select
 import os
+import sys
+
+
+if len(sys.argv) < 2:
+    print("Argument missing")
+    sys.exit()
+
 
 EOL1 = b'\n\n'
 EOL2 = b'\n\r\n'
@@ -16,7 +23,7 @@ serversocket.listen(1)
 
 epoll = select.epoll()
 epoll.register(serversocket.fileno(), select.EPOLLIN)
-file_name = "../../Desktop/film.m4v"
+file_name = sys.argv[1]
 file_size = os.path.getsize(file_name)
 
 file_pointer = open(file_name, "rb")

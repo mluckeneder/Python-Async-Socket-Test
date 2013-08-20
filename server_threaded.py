@@ -3,27 +3,35 @@
 import socket
 import os
 import threading
+import sys
 
-class ClientThread(threading.Thread):
-    """docstring for ClientThread"""
-    def __init__(self, socket):
-        threading.Thread.__init__(self)
-        self.socket = socket
+if len(sys.argv) < 2:
+    print("Argument missing")
+    sys.exit()
 
-    def __run__(self):
-        print("Running")
+def handle_client(conn):
+    global file_pointer, file_size
+    request = b''
+    while True:
+        request += conn.recv(1024)
+        if (EOL1 in request or EOL2 in request):
+            break
+
+    print('-'*40 + '\n' + request.decode()[:-2])
+
+    os.sendfile(conn.fileno(), file_pointer.fileno(), 0, file_size)
 
 
 
 
-file_name = "../../Desktop/film.m4v"
+file_name = sys.arvg[1]
 file_size = os.path.getsize(file_name)
 file_pointer = open(file_name, "rb")
 
 EOL1 = b'\n\n'
 EOL2 = b'\n\r\n'
 response  = b'HTTP/1.0 200 OK\r\nDate: Mon, 1 Jan 1996 01:01:01 GMT\r\n'
-response += bytes("Content-Type: video/mp4\r\nContent-Length: %i\r\n\r\n" % (file_size), "ascii")
+# response += bytes("Content-Type: video/mp4\r\nContent-Length: %i\r\n\r\n" % (file_size), "ascii")
 
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,7 +45,8 @@ try:
     while True:
 
         conn, address = serversocket.accept()
-        thread = ClientThread(conn)
+        thread = threading.Thread(target=handle_client, args=(conn,))
+        print("Receiving")
         threads.append(thread)
         thread.start()
 
