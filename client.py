@@ -1,7 +1,6 @@
 # Echo client program
 import socket
 import multiprocessing
-import functools
 import threading
 
 def handle_client(tid):
