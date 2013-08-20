@@ -11,7 +11,7 @@ class ClientThread(threading.Thread):
         self.socket = socket
 
     def __run__(self):
-        print "Running"
+        print("Running")
 
 
 
