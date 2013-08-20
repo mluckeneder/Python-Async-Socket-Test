@@ -71,6 +71,7 @@ try:
 				del response_file[fileno]
 finally:
 	epoll.unregister(serversocket.fileno())
+
 	epoll.close()
 	serversocket.close()
 	file_pointer.close()
