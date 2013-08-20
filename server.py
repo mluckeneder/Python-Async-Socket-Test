@@ -6,6 +6,7 @@ import os
 
 EOL1 = b'\n\n'
 EOL2 = b'\n\r\n'
+response  = b'HTTP/1.0 200 OK\r\nDate: Mon, 1 Jan 1996 01:01:01 GMT\r\n'
 
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,6 +18,10 @@ epoll = select.epoll()
 epoll.register(serversocket.fileno(), select.EPOLLIN)
 file_name = "../../Desktop/film.m4v"
 file_size = os.path.getsize(file_name)
+
+file_pointer = open(file_name, "rb")
+
+response += bytes("Content-Type: video/mp4\r\nContent-Length: %i\r\n\r\n" % (file_size), "ascii")
 try:
 	connections = {}
 	requests = {}
@@ -34,7 +39,8 @@ try:
 				epoll.register(conn.fileno(), select.EPOLLIN)
 				connections[conn.fileno()] = conn
 				requests[conn.fileno()] = b''
-				response_file[conn.fileno()] = (open(file_name, 'rb'), 0)
+				response_file[conn.fileno()] = 0
+				responses[conn.fileno()] = 0
 
 			elif event == select.EPOLLIN:
 				requests[fileno] += connections[fileno].recv(1024)
@@ -43,11 +49,17 @@ try:
 					print('-'*40 + '\n' + requests[fileno].decode()[:-2])
 
 			elif event == select.EPOLLOUT:
-				f, p = response_file[fileno]
-				byteswritten = os.sendfile(fileno, f.fileno(), p, 8192)
-				 # = connections[fileno].send(f.read(8192))
-				response_file[fileno] = (f, p+byteswritten)
-				if p+byteswritten == file_size:
+				header_p = responses[fileno]
+
+				if header_p < len(response):
+					byteswritten = connections[fileno].send(response[header_p:])
+					responses[fileno] += byteswritten
+				else:
+					p = response_file[fileno]
+					byteswritten = os.sendfile(fileno, file_pointer.fileno(), p, 8192)
+					response_file[fileno] = p + byteswritten
+
+				if response_file[fileno] == file_size:
 					epoll.modify(fileno, 0)
 					connections[fileno].shutdown(socket.SHUT_RDWR)
 
@@ -61,3 +73,4 @@ finally:
 	epoll.unregister(serversocket.fileno())
 	epoll.close()
 	serversocket.close()
+	file_pointer.close()
