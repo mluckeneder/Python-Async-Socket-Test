@@ -37,7 +37,7 @@ try:
     while True:
 
         conn, address = serversocket.accept()
-        thread = CLientThread(conn)
+        thread = ClientThread(conn)
         threads.append(thread)
         thread.start()
 
