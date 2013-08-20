@@ -26,7 +26,7 @@ def test_client():
 	print("Iteration")
 	tasks = []
 	for i in range(5):
-		p = threading.Thread(target=functools.partial(handle_client, i))
+		p = threading.Thread(target=handle_client, args=(i,))
 		tasks.append(p)
 		p.start()
 
